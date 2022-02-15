@@ -1,14 +1,15 @@
-FROM nginx:1.17-alpine
+FROM nginx:1.21-alpine
 
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl bash
 
-COPY default.conf /etc/nginx/conf.d/
+RUN mkdir -p /etc/nginx/ssl/dummy /var/www
+
+COPY nginx.conf /etc/nginx/
 COPY options-ssl-nginx.conf /etc/nginx/
-COPY hsts.conf /etc/nginx/
-COPY nginx.sh /customization/
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-RUN chmod +x /customization/nginx.sh
+RUN chmod +x /docker-entrypoint.sh
 
-EXPOSE 80
+EXPOSE 8080
+EXPOSE 8443
 
-CMD ["/customization/nginx.sh"]
