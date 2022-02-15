@@ -8,9 +8,9 @@ services:
   nginx:
     build: ./nginx
     image: wisecoding/nginx-proxy
+    container_name: nginx
     networks:
       - web
-    #user: nginx
     env_file:
       - ./config.env
     volumes:
@@ -23,9 +23,10 @@ services:
     restart: always
 
   certbot:
+    container_name: certbot
     build: ./certbot
     image: wisecoding/certbot
-    user: certbot
+    #user: certbot
     networks:
       - web
     env_file:
