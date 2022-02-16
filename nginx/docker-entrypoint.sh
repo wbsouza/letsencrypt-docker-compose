@@ -1,6 +1,7 @@
 #!/bin/sh
 
 set -e
+set -x
 
 if [ -z "$DOMAINS" ]; then
   echo "DOMAINS environment variable is not set"
@@ -8,20 +9,25 @@ if [ -z "$DOMAINS" ]; then
 fi
 
 NGINX_CONF="/etc/nginx/conf.d/default.conf"
+CONF_DIR="/etc/nginx/conf.d"
 
-if [ ! -f "${NGINX_CONF}" ]; then
+printf "server_names_hash_bucket_size 64;\n" > "${NGINX_CONF}"
 
-  echo "Generating the initial configuration [${NGINX_CONF}]..."
-  printf "server_names_hash_bucket_size 64;\n" > "${NGINX_CONF}"
 
-  for domain in $DOMAINS; do
+for domain in $DOMAINS; do
 
+  CONFIG_FILE="${CONF_DIR}/${domain}.conf" 
+
+  if [ ! -f "${CONFIG_FILE}" ]; then
+
+    echo "Generating the nginx initial configuration for the domain [${domain}] ..."
     if [ ! -d "/var/www/html/${domain}" ]; then
       mkdir -p "/var/www/html/${domain}"
       mkdir -p "/etc/nginx/ssl/dummy/${domain}"
       cp -fR /usr/share/nginx/html/*  "/var/www/html/${domain}"
     fi
-    cat << EOF >> "${NGINX_CONF}"
+
+    cat << EOF > "${CONFIG_FILE}"
 
 server {
     listen 80;
@@ -51,8 +57,8 @@ server {
 
 EOF
 
-  done
-fi
+  fi
+done
 
 
 for domain in $DOMAINS; do

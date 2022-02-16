@@ -26,7 +26,7 @@ services:
     image: wisecoding/certbot
     container_name: certbot
     build: ./certbot
-    user: certbot
+    #user: certbot
     restart: always
     networks:
       - web
