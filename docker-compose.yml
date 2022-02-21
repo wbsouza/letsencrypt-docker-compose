@@ -14,6 +14,7 @@ services:
     env_file:
       - ./config.env
     volumes:
+      - "${BASE_DIR}/config.env:/etc/config.env"
       - "${BASE_DIR}/data/nginx/conf.d/:/etc/nginx/conf.d"
       - "${BASE_DIR}/data/nginx/ssl:/etc/nginx/ssl"
       - "${BASE_DIR}/data/letsencrypt:/etc/letsencrypt"
@@ -33,6 +34,7 @@ services:
     env_file:
       - ./config.env
     volumes:
+      - "${BASE_DIR}/config.env:/etc/config.env"
       - "${BASE_DIR}/data/letsencrypt:/etc/letsencrypt"
     depends_on:
       - nginx

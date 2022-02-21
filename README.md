@@ -52,7 +52,7 @@ To adapt the example to your domain names you need to change only `config.env`:
 
 ```properties
 DOMAINS=test1.devcomanda.com test2.devcomanda.com
-CERTBOT_EMAILS=info@devcomanda.com info@devcomanda.com
+CERTBOT_EMAIS=info@devcomanda.com info@devcomanda.com
 CERTBOT_TEST_CERT=1
 CERTBOT_RSA_KEY_SIZE=4096
 ```

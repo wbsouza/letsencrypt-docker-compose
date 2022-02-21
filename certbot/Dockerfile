@@ -3,6 +3,7 @@ FROM certbot/certbot
 WORKDIR /opt/certbot
 
 COPY docker-entrypoint.sh docker-entrypoint.sh
+COPY check_and_renew.py /opt/certbot/tools
 
 RUN apk add --no-cache bash && \
     addgroup -S certbot --gid 101 && \

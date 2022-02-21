@@ -4,6 +4,11 @@ set -e
 
 trap exit INT TERM
 
+if [ -e /etc/config.env ]; then
+  . /etc/config.env
+fi
+
+
 if [ -z "$DOMAINS" ]; then
   echo "DOMAINS environment variable is not set"
   exit 1;
@@ -18,16 +23,17 @@ if [ "$CERTBOT_TEST_CERT" != "0" ]; then
   test_cert_arg="--test-cert"
 fi
 
+
 domain_list=($DOMAINS)
-emails_list=($CERTBOT_EMAILS)
 for i in "${!domain_list[@]}"; do
 
   domain="${domain_list[i]}"
   cert_dir="/etc/letsencrypt/live/$domain"
-
-  if [ -d "$cert_dir" ]; then
-    echo "Let's Encrypt certificate for $domain already exists"
+  full_cert_chain="${cert_dir}/fullchain.pem"
+  if [ -L ${full_cert_chain} ] && [ -e ${full_cert_chain} ]; then
     continue
+  else
+    echo ">>>>>>> will issue a certificate"	  
   fi
 
   mkdir -p "${cert_dir}"
@@ -36,7 +42,7 @@ for i in "${!domain_list[@]}"; do
   if [ -z "${emails_list[i]}" ]; then
     email_arg="--register-unsafely-without-email"
   else
-    email_arg="--email ${emails_list[i]}"
+    email_arg="--email ${CERTBOT_EMAIL}"
   fi
 
   echo "------------------- trying get cert now ...."
@@ -51,4 +57,14 @@ for i in "${!domain_list[@]}"; do
 done
 
 
-sleep 10m
+last_date=$(date +%Y%m%d)
+while true; do
+  curr_date=$(date +%Y%m%d)
+  diff=$[ $curr_date - $last_date ]
+  if [ "${diff}" -gt 10 ]; then
+    certbot renew --dry-run 
+    last_date=$curr_date
+  fi
+  sleep 30s
+done
+

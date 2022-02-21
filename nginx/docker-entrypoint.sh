@@ -1,24 +1,27 @@
 #!/bin/sh
 
 set -e
-set -x
+
+if [ -e /etc/config.env ]; then
+  . /etc/config.env
+fi
 
 if [ -z "$DOMAINS" ]; then
   echo "DOMAINS environment variable is not set"
   exit 1;
 fi
 
-NGINX_CONF="/etc/nginx/conf.d/default.conf"
-CONF_DIR="/etc/nginx/conf.d"
+nginx_conf="/etc/nginx/conf.d/default.conf"
+configs_dir="/etc/nginx/conf.d"
 
-printf "server_names_hash_bucket_size 64;\n" > "${NGINX_CONF}"
+printf "server_names_hash_bucket_size 64;\n" > "${nginx_conf}"
 
 
 for domain in $DOMAINS; do
 
-  CONFIG_FILE="${CONF_DIR}/${domain}.conf" 
+  config_file="${configs_dir}/${domain}.conf" 
 
-  if [ ! -f "${CONFIG_FILE}" ]; then
+  if [ ! -f "${config_file}" ]; then
 
     echo "Generating the nginx initial configuration for the domain [${domain}] ..."
     if [ ! -d "/var/www/html/${domain}" ]; then
@@ -27,7 +30,7 @@ for domain in $DOMAINS; do
       cp -fR /usr/share/nginx/html/*  "/var/www/html/${domain}"
     fi
 
-    cat << EOF > "${CONFIG_FILE}"
+    cat << EOF > "${config_file}"
 
 server {
     listen 80;
@@ -79,8 +82,9 @@ fi
 
 use_lets_encrypt_certificates() {
   domain=$1
+  config_file="${configs_dir}/${domain}.conf" 
   echo "Switching Nginx to use Let's Encrypt certificate for $domain"
-  sed -i "s|/etc/nginx/ssl/dummy/$domain|/etc/letsencrypt/live/$domain|g" /etc/nginx/conf.d/default.conf
+  sed -i "s|/etc/nginx/ssl/dummy/$domain|/etc/letsencrypt/live/$domain|g" "${config_file}"
 }
 
 reload_nginx() {
